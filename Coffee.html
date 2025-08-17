@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>My Coffee Shop</title>
+<style>
+  :root{
+    --bg:#f7f3ee; --ink:#2b2a28; --accent:#6f4e37; --accent-2:#b08968; --card:#fff;
+    --ok:#2e7d32; --danger:#b71c1c; --muted:#7a7771; --border:#e5dfd7;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family: system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+  header{position:sticky;top:0;background:linear-gradient(180deg,#f3ebe3 0%, #f7f3ee 100%);border-bottom:1px solid var(--border);z-index:9}
+  .wrap{max-width:1100px;margin:0 auto;padding:16px}
+  h1{margin:8px 0 4px;font-size:22px}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 0}
+  .tab-btn{border:1px solid var(--border);background:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
+  .tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  main{padding:16px 0}
+  .hidden{display:none}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+  label{display:block;font-size:14px;margin:8px 0 4px;color:var(--muted)}
+  input[type="text"],input[type="number"],select{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:10px 12px;cursor:pointer}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.alt{background:#fff;border-color:var(--accent);color:var(--accent)}
+  .btn.success{background:var(--ok);border-color:var(--ok);color:#fff}
+  .btn.danger{background:var(--danger);border-color:var(--danger);color:#fff}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:14px}
+  tfoot td{font-weight:600}
+  .pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#efe7df;color:#5a4636;font-size:12px}
+  .muted{color:var(--muted)}
+  .price{font-variant-numeric: tabular-nums}
+  .toolbar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:10px 0}
+  .menu-item{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .menu-title{font-weight:600}
+  .menu-actions{display:flex;gap:6px}
+  .sell-card{display:flex;flex-direction:column;gap:6px;min-height:120px}
+  .sell-card h4{margin:0}
+  .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:10px 0}
+  .kpi .card{display:flex;justify-content:space-between;align-items:center}
+  .hint{font-size:12px;color:var(--muted)}
+  .divider{height:1px;background:var(--border);margin:10px 0}
+  .right{margin-left:auto}
+  .center{display:flex;justify-content:center;align-items:center}
+</style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>☕ My Coffee Shop</h1>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="sell">Sell</button>
+        <button class="tab-btn" data-tab="menu">Menu</button>
+        <button class="tab-btn" data-tab="reports">Reports</button>
+        <button class="tab-btn" data-tab="settings">Settings</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- SELL -->
+    <section id="sell" class="">
+      <div class="kpi">
+        <div class="card"><div>Today Items</div><div class="price" id="kpi-items">0</div></div>
+        <div class="card"><div>Today Revenue</div><div class="price" id="kpi-rev">0 VNĐ</div></div>
+        <div class="card"><div>Entries</div><div class="price" id="kpi-entries">0</div></div>
+      </div>
+
+      <div class="toolbar">
+        <div class="row">
+          <span class="pill">Tap item to add sale</span>
+        </div>
+        <div class="row">
+          <button class="btn alt" id="btn-undo">Undo last</button>
+          <button class="btn" id="btn-clear-today">Clear today</button>
+        </div>
+      </div>
+
+      <div id="sell-grid" class="grid"></div>
+
+      <h3>Today's Sold Items</h3>
+      <div class="hint">Grouped by item (today only)</div>
+      <div id="today-table"></div>
+    </section>
+
+    <!-- MENU -->
+    <section id="menu" class="hidden">
+      <div class="grid">
+        <div class="card">
+          <h3>Add / Edit Menu Item</h3>
+          <label>Name</label>
+          <input id="menu-name" type="text" placeholder="Cà phê đen" />
+          <label>Price (VNĐ)</label>
+          <input id="menu-price" type="number" min="0" step="500" placeholder="15000" />
+          <div class="row">
+            <button id="menu-save" class="btn primary">Save</button>
+            <button id="menu-reset" class="btn">Reset</button>
+            <span class="hint">Example: “Cà phê đen – 15,000 VNĐ”</span>
+          </div>
+          <input id="menu-id" type="hidden" />
+        </div>
+
+        <div class="card">
+          <h3>Menu List</h3>
+          <div id="menu-list" class="grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REPORTS -->
+    <section id="reports" class="hidden">
+      <div class="card">
+        <div class="row">
+          <label for="period">Period</label>
+          <select id="period">
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="year">This Year</option>
+          </select>
+          <button class="btn" id="btn-prev">◀ Prev</button>
+          <button class="btn" id="btn-next">Next ▶</button>
+          <div id="period-label" class="pill right"></div>
+        </div>
+        <div class="divider"></div>
+        <div class="kpi">
+          <div class="card"><div>Total Items</div><div class="price" id="r-items">0</div></div>
+          <div class="card"><div>Total Revenue</div><div class="price" id="r-rev">0 VNĐ</div></div>
+          <div class="card"><div>Distinct Products</div><div class="price" id="r-products">0</div></div>
+        </div>
+        <div id="report-table"></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="settings" class="hidden">
+      <div class="grid">
+        <div class="card">
+          <h3>Data</h3>
+          <div class="row">
+            <button id="btn-seed" class="btn">Seed sample menu</button>
+            <button id="btn-clear-all" class="btn danger">Clear ALL data</button>
+          </div>
+          <p class="hint">Data is stored in your browser's <code>localStorage</code> only.</p>
+        </div>
+        <div class="card">
+          <h3>About</h3>
+          <p>Static web app for a coffee shop. No backend. Built with vanilla HTML/CSS/JS.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+<script>
+/* ===================== Utilities ===================== */
+const LS_MENU = 'coffee_menu_v1';
+const LS_SALES = 'coffee_sales_v1';
+
+const currency = new Intl.NumberFormat('vi-VN', { style:'currency', currency:'VND', maximumFractionDigits:0 });
+const numberfmt = new Intl.NumberFormat('vi-VN');
+
+const qs = s => document.querySelector(s);
+const qsa = s => Array.from(document.querySelectorAll(s));
+
+const uuid = () => Math.random().toString(36).slice(2)+Date.now().toString(36);
+
+function loadMenu(){ try{ return JSON.parse(localStorage.getItem(LS_MENU)) || []; }catch{ return []; } }
+function saveMenu(arr){ localStorage.setItem(LS_MENU, JSON.stringify(arr)); }
+function loadSales(){ try{ return JSON.parse(localStorage.getItem(LS_SALES)) || []; }catch{ return []; } }
+function saveSales(arr){ localStorage.setItem(LS_SALES, JSON.stringify(arr)); }
+
+function startOfDay(d){ const x=new Date(d); x.setHours(0,0,0,0); return x; }
+function endOfDay(d){ const x=new Date(d); x.setHours(23,59,59,999); return x; }
+
+/* Week (ISO-like): Monday start */
+function startOfWeek(date, offset=0){
+  const d = new Date(date);
+  d.setDate(d.getDate() + offset*7);
+  const day = (d.getDay() + 6) % 7; // 0=Mon
+  d.setDate(d.getDate()-day);
+  d.setHours(0,0,0,0);
+  return d;
+}
+function endOfWeek(date, offset=0){
+  const s = startOfWeek(date, offset);
+  const e = new Date(s); e.setDate(e.getDate()+6); e.setHours(23,59,59,999); return e;
+}
+function startOfMonth(date, offset=0){
+  const d = new Date(date);
+  d.setMonth(d.getMonth()+offset,1);
+  d.setHours(0,0,0,0);
+  return d;
+}
+function endOfMonth(date, offset=0){
+  const s = startOfMonth(date, offset);
+  const e = new Date(s); e.setMonth(e.getMonth()+1,0); e.setHours(23,59,59,999); return e;
+}
+function startOfYear(date, offset=0){
+  const d = new Date(date); d.setFullYear(d.getFullYear()+offset,0,1); d.setHours(0,0,0,0); return d;
+}
+function endOfYear(date, offset=0){
+  const s = startOfYear(date, offset); const e = new Date(s); e.setFullYear(e.getFullYear(),11,31); e.setHours(23,59,59,999); return e;
+}
+
+function formatDateRange(a,b){
+  const f = new Intl.DateTimeFormat('vi-VN',{dateStyle:'medium'});
+  return f.format(a)+' - '+f.format(b);
+}
+
+/* ===================== State ===================== */
+let menu = loadMenu();
+let sales = loadSales();
+let reportOffset = 0; // for prev/next navigation
+
+/* ===================== Tabs ===================== */
+qsa('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    qsa('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.tab;
+    qsa('main section').forEach(s=>s.classList.add('hidden'));
+    qs('#'+tab).classList.remove('hidden');
+    if(tab==='sell'){ renderSell(); renderToday(); }
+    if(tab==='menu'){ renderMenu(); }
+    if(tab==='reports'){ renderReports(); }
+  });
+});
+
+/* ===================== MENU CRUD ===================== */
+function renderMenu(){
+  const list = qs('#menu-list');
+  if(menu.length===0){
+    list.innerHTML = `<div class="card center"><div class="muted">No items. Add some on the left or use “Seed sample menu”.</div></div>`;
+    return;
+  }
+  list.innerHTML = '';
+  menu.forEach(item=>{
+    const card = document.createElement('div');
+    card.className = 'card menu-item';
+    card.innerHTML = `
+      <div>
+        <div class="menu-title">${item.name}</div>
+        <div class="muted price">${currency.format(item.price)}</div>
+      </div>
+      <div class="menu-actions">
+        <button class="btn" data-act="edit">Edit</button>
+        <button class="btn danger" data-act="del">Delete</button>
+      </div>`;
+    card.querySelector('[data-act="edit"]').onclick = ()=>{
+      qs('#menu-id').value = item.id;
+      qs('#menu-name').value = item.name;
+      qs('#menu-price').value = item.price;
+      window.scrollTo({top:0,behavior:'smooth'});
+    };
+    card.querySelector('[data-act="del"]').onclick = ()=>{
+      if(confirm(`Delete "${item.name}"?`)){
+        menu = menu.filter(m=>m.id!==item.id);
+        saveMenu(menu);
+        renderMenu();
+        renderSell();
+      }
+    };
+    list.appendChild(card);
+  });
+}
+
+qs('#menu-save').addEventListener('click', ()=>{
+  const id = qs('#menu-id').value || uuid();
+  const name = qs('#menu-name').value.trim();
+  const price = +qs('#menu-price').value;
+  if(!name){ alert('Name is required'); return; }
+  if(!(price>=0)){ alert('Price must be a number ≥ 0'); return; }
+
+  const idx = menu.findIndex(m=>m.id===id);
+  if(idx>=0){ menu[idx] = {id,name,price}; }
+  else{ menu.push({id,name,price}); }
+  saveMenu(menu);
+  qs('#menu-id').value=''; qs('#menu-name').value=''; qs('#menu-price').value='';
+  renderMenu(); renderSell();
+});
+
+qs('#menu-reset').addEventListener('click', ()=>{
+  qs('#menu-id').value=''; qs('#menu-name').value=''; qs('#menu-price').value='';
+});
+
+/* ===================== SELL ===================== */
+function renderSell(){
+  const grid = qs('#sell-grid');
+  if(menu.length===0){ grid.innerHTML = `<div class="card center"><div class="muted">No menu items yet.</div></div>`; return; }
+  grid.innerHTML='';
+  menu.forEach(item=>{
+    const el = document.createElement('div');
+    el.className='card sell-card';
+    el.innerHTML = `
+      <h4>${item.name}</h4>
+      <div class="muted price">${currency.format(item.price)}</div>
+      <div class="row">
+        <input type="number" min="1" step="1" value="1" style="max-width:110px" aria-label="Quantity" />
+        <button class="btn success right">Add</button>
+      </div>`;
+    const qtyInput = el.querySelector('input');
+    el.querySelector('button').onclick = ()=>{
+      const qty = Math.max(1, Math.floor(+qtyInput.value||1));
+      const ts = Date.now();
+      sales.push({ id: uuid(), itemId: item.id, name: item.name, price: item.price, qty, ts });
+      saveSales(sales);
+      renderToday();
+    };
+    grid.appendChild(el);
+  });
+}
+
+function renderToday(){
+  const s = startOfDay(new Date()), e = endOfDay(new Date());
+  const todaySales = sales.filter(x=>x.ts>=s.getTime() && x.ts<=e.getTime());
+  const {rows,totalQty,totalRev,entries} = aggregate(todaySales);
+  qs('#kpi-items').textContent = numberfmt.format(totalQty);
+  qs('#kpi-rev').textContent = currency.format(totalRev);
+  qs('#kpi-entries').textContent = numberfmt.format(entries);
+
+  qs('#today-table').innerHTML = tableHTML(rows, true);
+}
+
+qs('#btn-undo').addEventListener('click', ()=>{
+  const last = sales[sales.length-1];
+  if(!last){ alert('Nothing to undo.'); return; }
+  if(confirm(`Undo last: ${last.qty} x ${last.name}?`)){
+    sales.pop(); saveSales(sales); renderToday();
+  }
+});
+
+qs('#btn-clear-today').addEventListener('click', ()=>{
+  const s = startOfDay(new Date()).getTime();
+  const e = endOfDay(new Date()).getTime();
+  const count = sales.filter(x=>x.ts>=s && x.ts<=e).length;
+  if(count===0){ alert('No entries for today.'); return; }
+  if(confirm(`Clear ${count} sale entries for today?`)){
+    sales = sales.filter(x=>x.ts<s || x.ts>e);
+    saveSales(sales); renderToday();
+  }
+});
+
+/* ===================== REPORTS ===================== */
+function aggregate(arr){
+  const map = new Map();
+  let totalQty=0,totalRev=0;
+  arr.forEach(x=>{
+    const key = x.itemId || x.name;
+    const v = map.get(key) || {name:x.name, qty:0, revenue:0};
+    v.qty += x.qty;
+    v.revenue += x.qty * x.price;
+    totalQty += x.qty;
+    totalRev += x.qty * x.price;
+    map.set(key, v);
+  });
+  const rows = Array.from(map.values()).sort((a,b)=>b.revenue-a.revenue);
+  return {rows,totalQty,totalRev,entries:arr.length};
+}
+
+function tableHTML(rows, showIndex=false){
+  if(rows.length===0) return `<div class="card center"><div class="muted">No data</div></div>`;
+  let html = `<table><thead><tr>${showIndex?'<th>#</th>':''}<th>Item</th><th>Qty</th><th>Revenue</th></tr></thead><tbody>`;
+  rows.forEach((r,i)=>{
+    html += `<tr>${showIndex?`<td>${i+1}</td>`:''}<td>${r.name}</td><td>${numberfmt.format(r.qty)}</td><td class="price">${currency.format(r.revenue)}</td></tr>`;
+  });
+  const totalQty = rows.reduce((a,b)=>a+b.qty,0);
+  const totalRev = rows.reduce((a,b)=>a+b.revenue,0);
+  html += `</tbody><tfoot><tr>${showIndex?'<td></td>':''}<td>Total</td><td>${numberfmt.format(totalQty)}</td><td class="price">${currency.format(totalRev)}</td></tr></tfoot></table>`;
+  return html;
+}
+
+function getPeriodRange(kind='week', offset=0){
+  const now = new Date();
+  if(kind==='week'){
+    return { start: startOfWeek(now, offset), end: endOfWeek(now, offset), label: `Week ${offset===0?'(current)':''} ${formatDateRange(startOfWeek(now, offset), endOfWeek(now, offset))}` };
+  }
+  if(kind==='month'){
+    return { start: startOfMonth(now, offset), end: endOfMonth(now, offset), label: `Month ${offset===0?'(current)':''} ${formatDateRange(startOfMonth(now, offset), endOfMonth(now, offset))}` };
+  }
+  return { start: startOfYear(now, offset), end: endOfYear(now, offset), label: `Year ${offset===0?'(current)':''} ${formatDateRange(startOfYear(now, offset), endOfYear(now, offset))}` };
+}
+
+function renderReports(){
+  const kind = qs('#period').value;
+  const {start,end,label} = getPeriodRange(kind, reportOffset);
+  qs('#period-label').textContent = label;
+  const arr = sales.filter(x=> x.ts>=start.getTime() && x.ts<=end.getTime());
+  const agg = aggregate(arr);
+  qs('#r-items').textContent = numberfmt.format(agg.totalQty);
+  qs('#r-rev').textContent = currency.format(agg.totalRev);
+  qs('#r-products').textContent = numberfmt.format(agg.rows.length);
+  qs('#report-table').innerHTML = tableHTML(agg.rows, true);
+}
+
+qs('#period').addEventListener('change', ()=>{ reportOffset=0; renderReports(); });
+qs('#btn-prev').addEventListener('click', ()=>{ reportOffset--; renderReports(); });
+qs('#btn-next').addEventListener('click', ()=>{ reportOffset++; renderReports(); });
+
+/* ===================== SETTINGS ===================== */
+qs('#btn-clear-all').addEventListener('click', ()=>{
+  if(confirm('Clear ALL menu and sales data? This cannot be undone.')){
+    localStorage.removeItem(LS_MENU);
+    localStorage.removeItem(LS_SALES);
+    menu = []; sales = [];
+    renderMenu(); renderSell(); renderToday(); renderReports();
+    alert('All data cleared.');
+  }
+});
+
+qs('#btn-seed').addEventListener('click', ()=>{
+  if(menu.length>0 && !confirm('Replace current menu with sample items?')) return;
+  menu = [
+    {id:uuid(), name:'Cà phê đen', price:15000},
+    {id:uuid(), name:'Cà phê sữa', price:18000},
+    {id:uuid(), name:'Bạc xỉu', price:22000},
+    {id:uuid(), name:'Trà chanh', price:16000},
+    {id:uuid(), name:'Trà đào', price:25000},
+    {id:uuid(), name:'Nước suối', price:8000},
+  ];
+  saveMenu(menu);
+  renderMenu(); renderSell();
+});
+
+/* ===================== Boot ===================== */
+(function init(){
+  // First render
+  renderSell();
+  renderToday();
+  renderMenu();
+  renderReports();
+})();
+</script>
+</body>
+</html>
