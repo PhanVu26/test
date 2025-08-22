@@ -1,254 +1,773 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coffee Shop Sales Tracker</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        nav {
-            background-color: #333;
-            color: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 1em;
-        }
-        nav a {
-            color: white;
-            text-decoration: none;
-            padding: 0.5em 1em;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
-        nav a:hover {
-            background-color: #555;
-        }
-        .container {
-            padding: 1em;
-            max-width: 800px;
-            margin: 0 auto;
-            flex: 1;
-        }
-        form {
-            background: white;
-            padding: 1em;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        label {
-            display: block;
-            margin: 0.5em 0 0.2em;
-        }
-        input, select {
-            width: 100%;
-            padding: 0.5em;
-            margin-bottom: 1em;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 0.7em;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1em;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        th, td {
-            padding: 0.8em;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .total {
-            font-weight: bold;
-        }
-        .alert {
-            background: #d4edda;
-            color: #155724;
-            padding: 1em;
-            margin-bottom: 1em;
-            border-radius: 4px;
-            display: none;
-        }
-        @media (max-width: 600px) {
-            nav {
-                flex-direction: column;
-            }
-            nav a {
-                margin: 0.5em 0;
-            }
-        }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Personal Finance — Simple & Local</title>
+<style>
+  :root{
+    --bg:#0f1217; --panel:#151a21; --muted:#2a3340; --ink:#e7edf6; --sub:#9fb1c9;
+    --accent:#7dd3fc; --accent-2:#a7f3d0; --danger:#fca5a5; --warn:#fde68a;
+    --ok:#86efac; --card:#121720; --stroke:#223045; --ring:#2e3b52;
+    --radius:14px; --shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:linear-gradient(180deg,#0d1116,#0f141b 35%,#0c1016);}
+  body{font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+       color:var(--ink); line-height:1.35}
+  a{color:var(--accent)}
+  .app{max-width:1100px; margin:24px auto 48px; padding:0 16px}
+  header{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px
+  }
+  .brand{display:flex; align-items:center; gap:12px}
+  .logo{width:40px;height:40px; border-radius:12px; background:
+     radial-gradient(120% 120% at 20% 20%, #7dd3fc 0%, #22d3ee 40%, #0ea5e9 60%, #075985 100%);
+     box-shadow:0 8px 24px rgba(34,211,238,.25)}
+  h1{font-size:18px; margin:0}
+  .sub{color:var(--sub); font-size:12px}
+
+  .tabs{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 18px}
+  .tab-btn{border:1px solid var(--stroke); background:linear-gradient(180deg,#141a22,#10151c);
+           color:var(--ink); padding:10px 14px; border-radius:12px; cursor:pointer}
+  .tab-btn.active{border-color:transparent; background:linear-gradient(180deg,#1c2430,#151c26);
+           box-shadow:inset 0 0 0 1px #2b3b53, 0 6px 18px rgba(0,0,0,.35)}
+
+  .grid{display:grid; grid-template-columns:1.2fr .8fr; gap:16px}
+  @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
+
+  .panel{background:linear-gradient(180deg,#121822,#0f141c); border:1px solid var(--stroke);
+         border-radius:var(--radius); box-shadow:var(--shadow)}
+  .panel .hd{display:flex; align-items:center; justify-content:space-between; padding:14px 16px;
+             border-bottom:1px solid var(--stroke)}
+  .panel .hd h2{margin:0; font-size:15px}
+  .panel .bd{padding:14px 16px}
+
+  .summary{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+  @media (max-width: 700px){ .summary{grid-template-columns:1fr} }
+  .card{background:linear-gradient(180deg,#141c27,#0f151e); border:1px solid var(--stroke);
+        border-radius:12px; padding:14px}
+  .k{font-size:12px; color:var(--sub)}
+  .v{font-size:22px; font-weight:700}
+  .v.positive{color:var(--ok)} .v.negative{color:var(--danger)}
+  .chip{font-size:11px; border:1px solid var(--ring); padding:4px 8px; border-radius:999px; color:var(--sub)}
+  .row{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .grow{flex:1}
+  .mt8{margin-top:8px} .mt12{margin-top:12px} .mt16{margin-top:16px}
+  .mb8{margin-bottom:8px} .mb0{margin-bottom:0}
+
+  label{font-size:12px; color:var(--sub); display:block; margin-bottom:6px}
+  input, select, textarea{
+    width:100%; background:#0e141c; color:var(--ink);
+    border:1px solid var(--stroke); border-radius:10px; padding:10px 12px; outline:none
+  }
+  input:focus, select:focus, textarea:focus{border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+  button{cursor:pointer}
+  .btn{
+    border:1px solid var(--stroke); background:linear-gradient(180deg,#1a2430,#15202b);
+    color:var(--ink); padding:10px 14px; border-radius:12px
+  }
+  .btn.primary{border-color:transparent; background:linear-gradient(180deg,#1e293b,#0f172a)}
+  .btn.danger{border-color:#3b1f24; background:linear-gradient(180deg,#2a1116,#1a0a0e); color:#fecaca}
+  .btn.ghost{background:transparent}
+
+  .list{width:100%; border-collapse:separate; border-spacing:0 10px}
+  .list th{font-size:12px; color:var(--sub); text-align:left; padding:0 10px}
+  .list td{padding:12px 10px; background:linear-gradient(180deg,#0f151e,#0d131a); border:1px solid var(--stroke)}
+  .list tr td:first-child{border-radius:10px 0 0 10px}
+  .list tr td:last-child{border-radius:0 10px 10px 0}
+  .pill{font-size:11px; padding:4px 8px; border-radius:999px; border:1px solid var(--ring); color:var(--sub)}
+  .type-inc{background:rgba(134,239,172,.08); border-color:rgba(134,239,172,.4); color:#bbf7d0}
+  .type-exp{background:rgba(252,165,165,.08); border-color:rgba(252,165,165,.4); color:#fecaca}
+  .progress{height:10px; background:#0c1117; border:1px solid var(--stroke); border-radius:999px; overflow:hidden}
+  .progress > span{display:block; height:100%; background:linear-gradient(90deg,#22d3ee,#a7f3d0)}
+
+  .hint{font-size:12px; color:var(--sub)}
+  .right{margin-left:auto}
+  .muted{color:var(--sub)}
+  .nowrap{white-space:nowrap}
+  .hidden{display:none !important}
+</style>
 </head>
 <body>
-    <nav>
-        <a href="#add-sale">Add Sale</a>
-        <a href="#summary">Summary</a>
-    </nav>
-    <div class="container">
-        <div id="add-sale" class="page">
-            <h1>Add Sale</h1>
-            <div id="alert" class="alert">Sale recorded successfully!</div>
-            <form id="sale-form">
-                <label for="item">Item:</label>
-                <select id="item">
-                    <option value="Cafe đen">Cafe đen ($2.50)</option>
-                    <option value="Ca cao">Ca cao ($3.00)</option>
-                    <option value="Cafe sữa">Cafe sữa ($2.80)</option>
-                </select>
-                
-                <label for="quantity">Quantity:</label>
-                <input type="number" id="quantity" min="1" value="1">
-                
-                <label for="price">Price per unit ($):</label>
-                <input type="number" id="price" step="0.01" value="2.50">
-                
-                <button type="submit">Record Sale</button>
-            </form>
-        </div>
-        
-        <div id="summary" class="page" style="display: none;">
-            <h1>Sales Summary</h1>
-            <label for="period">Period:</label>
-            <select id="period">
-                <option value="week">Week</option>
-                <option value="month">Month</option>
-                <option value="year">Year</option>
-            </select>
-            
-            <table id="summary-table">
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Quantity</th>
-                        <th>Total ($)</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-                <tfoot>
-                    <tr>
-                        <td class="total">Overall Total</td>
-                        <td></td>
-                        <td id="overall-total" class="total">$0.00</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>Personal Finance</h1>
+        <div class="sub">Local, private, offline — your data stays in this browser</div>
+      </div>
     </div>
+    <div class="row">
+      <select id="monthFilter" title="Filter month"></select>
+      <button class="btn" id="resetMonth">All time</button>
+    </div>
+  </header>
 
-    <script>
-        const sampleItems = {
-            "Cafe đen": 2.5,
-            "Ca cao": 3.0,
-            "Cafe sữa": 2.8
-        };
+  <nav class="tabs" role="tablist" aria-label="Primary">
+    <button class="tab-btn active" data-tab="dashboard" role="tab" aria-selected="true">Dashboard</button>
+    <button class="tab-btn" data-tab="transactions" role="tab">Transactions</button>
+    <button class="tab-btn" data-tab="savings" role="tab">Savings</button>
+    <button class="tab-btn" data-tab="settings" role="tab">Settings</button>
+  </nav>
 
-        // Load sales from localStorage
-        let sales = JSON.parse(localStorage.getItem('sales')) || [];
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="tab panel" role="tabpanel" aria-labelledby="Dashboard">
+    <div class="hd">
+      <h2>Overview</h2>
+      <div class="row">
+        <span class="chip" id="rangeLabel">All time</span>
+      </div>
+    </div>
+    <div class="bd">
+      <div class="summary">
+        <div class="card">
+          <div class="k">Total Income</div>
+          <div class="v positive" id="sumIncome">0</div>
+          <div class="hint mt8">Across selected period</div>
+        </div>
+        <div class="card">
+          <div class="k">Total Expenses</div>
+          <div class="v negative" id="sumExpense">0</div>
+          <div class="hint mt8">Across selected period</div>
+        </div>
+        <div class="card">
+          <div class="k">Net Balance</div>
+          <div class="v" id="sumNet">0</div>
+          <div class="row mt8">
+            <span class="chip" id="spendRate">Spend rate: 0%</span>
+          </div>
+        </div>
+      </div>
 
-        // Navigation
-        document.querySelectorAll('nav a').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const target = e.target.getAttribute('href').substring(1);
-                document.querySelectorAll('.page').forEach(page => {
-                    page.style.display = page.id === target ? 'block' : 'none';
-                });
-                if (target === 'summary') updateSummary();
-            });
-        });
+      <div class="grid mt16">
+        <div class="panel">
+          <div class="hd"><h2>Recent Transactions</h2>
+            <button class="btn ghost" id="gotoTrans">View all →</button>
+          </div>
+          <div class="bd">
+            <table class="list" id="recentTable" aria-label="Recent transactions">
+              <thead>
+                <tr>
+                  <th>Date</th><th>Type</th><th>Category</th><th class="right">Amount</th><th>Note</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <div class="hint mt12">Tip: Add new items in the Transactions tab.</div>
+          </div>
+        </div>
 
-        // Update price when item changes
-        document.getElementById('item').addEventListener('change', (e) => {
-            document.getElementById('price').value = sampleItems[e.target.value].toFixed(2);
-        });
+        <div class="panel">
+          <div class="hd"><h2>Charts</h2></div>
+          <div class="bd">
+            <div class="row">
+              <div class="grow">
+                <canvas id="pieIE" width="480" height="300" aria-label="Income vs Expenses chart"></canvas>
+              </div>
+            </div>
+            <div class="mt12">
+              <canvas id="barWeekly" width="480" height="220" aria-label="Weekly totals chart"></canvas>
+              <div class="hint mt8">Weekly totals for selected month (Mon–Sun). If “All time”, shows last 4 full weeks.</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        // Form submission
-        document.getElementById('sale-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const item = document.getElementById('item').value;
-            const quantity = parseInt(document.getElementById('quantity').value);
-            const price = parseFloat(document.getElementById('price').value);
-            const date = new Date().toISOString();
+    </div>
+  </section>
 
-            sales.push({ item, quantity, price, date });
-            localStorage.setItem('sales', JSON.stringify(sales));
+  <!-- TRANSACTIONS -->
+  <section id="transactions" class="tab panel hidden" role="tabpanel" aria-labelledby="Transactions">
+    <div class="hd"><h2>Transactions</h2></div>
+    <div class="bd">
+      <div class="panel">
+        <div class="hd"><h2>Add / Edit</h2></div>
+        <div class="bd">
+          <form id="txForm" class="row" autocomplete="off">
+            <input type="hidden" id="txId" />
+            <div style="flex:1 1 130px">
+              <label for="txType">Type</label>
+              <select id="txType" required>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </select>
+            </div>
+            <div style="flex:1 1 160px">
+              <label for="txCategory">Category</label>
+              <input id="txCategory" placeholder="e.g., Salary / Food" required/>
+            </div>
+            <div style="flex:1 1 160px">
+              <label for="txAmount">Amount</label>
+              <input id="txAmount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0" required/>
+            </div>
+            <div style="flex:1 1 160px">
+              <label for="txDate">Date</label>
+              <input id="txDate" type="date" required/>
+            </div>
+            <div style="flex:2 1 220px">
+              <label for="txNote">Note</label>
+              <input id="txNote" placeholder="Optional"/>
+            </div>
+            <div class="row mt8" style="width:100%">
+              <button class="btn primary" type="submit" id="saveTx">Save</button>
+              <button class="btn" type="button" id="resetTx">Reset</button>
+            </div>
+          </form>
+        </div>
+      </div>
 
-            document.getElementById('alert').style.display = 'block';
-            setTimeout(() => { document.getElementById('alert').style.display = 'none'; }, 3000);
+      <div class="mt16 panel">
+        <div class="hd"><h2>All Transactions</h2>
+          <div class="row">
+            <input id="searchTx" placeholder="Search note/category…" />
+            <select id="typeFilter">
+              <option value="">All types</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+        </div>
+        <div class="bd">
+          <table class="list" id="txTable" aria-label="Transactions">
+            <thead>
+              <tr>
+                <th>Date</th><th>Type</th><th>Category</th><th class="right">Amount</th><th>Note</th><th class="nowrap">Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div class="row mt12">
+            <span class="hint">Pro tip: click a row’s ✎ to edit or 🗑 to delete.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-            // Reset form
-            document.getElementById('quantity').value = 1;
-            document.getElementById('item').value = 'Cafe đen';
-            document.getElementById('price').value = sampleItems['Cafe đen'].toFixed(2);
-        });
+  <!-- SAVINGS -->
+  <section id="savings" class="tab panel hidden" role="tabpanel" aria-labelledby="Savings">
+    <div class="hd"><h2>Savings Goals</h2></div>
+    <div class="bd">
+      <div class="panel">
+        <div class="hd"><h2>Create Goal</h2></div>
+        <div class="bd">
+          <form id="goalForm" class="row" autocomplete="off">
+            <input type="hidden" id="goalId" />
+            <div style="flex:2 1 220px">
+              <label for="goalName">Name</label>
+              <input id="goalName" placeholder="Emergency fund / Travel" required/>
+            </div>
+            <div style="flex:1 1 160px">
+              <label for="goalTarget">Target Amount</label>
+              <input id="goalTarget" type="number" min="0" step="0.01" placeholder="0" required/>
+            </div>
+            <div style="flex:1 1 160px">
+              <label for="goalSaved">Saved So Far</label>
+              <input id="goalSaved" type="number" min="0" step="0.01" placeholder="0" required/>
+            </div>
+            <div style="flex:1 1 160px">
+              <label for="goalDeadline">Deadline</label>
+              <input id="goalDeadline" type="date"/>
+            </div>
+            <div class="row mt8" style="width:100%">
+              <button class="btn primary" type="submit" id="saveGoal">Save Goal</button>
+              <button class="btn" type="button" id="resetGoal">Reset</button>
+            </div>
+          </form>
+        </div>
+      </div>
 
-        // Update summary
-        document.getElementById('period').addEventListener('change', updateSummary);
+      <div class="mt16 panel">
+        <div class="hd"><h2>Your Goals</h2></div>
+        <div class="bd" id="goalList"></div>
+      </div>
+    </div>
+  </section>
 
-        function updateSummary() {
-            const period = document.getElementById('period').value;
-            const now = new Date();
-            let startDate;
+  <!-- SETTINGS -->
+  <section id="settings" class="tab panel hidden" role="tabpanel" aria-labelledby="Settings">
+    <div class="hd"><h2>Settings & Data</h2></div>
+    <div class="bd">
+      <div class="row">
+        <button class="btn" id="exportBtn">Export JSON</button>
+        <label class="btn" for="importFile" style="display:inline-flex; align-items:center; gap:8px; cursor:pointer">Import JSON<input id="importFile" type="file" accept="application/json" class="hidden"></label>
+        <button class="btn danger" id="wipeBtn">Clear All Data</button>
+      </div>
+      <p class="hint mt12">Export creates a local <code>.json</code> file of your transactions & goals. Import replaces current data.</p>
+    </div>
+  </section>
+</div>
 
-            if (period === 'week') {
-                startDate = new Date(now.setDate(now.getDate() - 7));
-            } else if (period === 'month') {
-                startDate = new Date(now.setMonth(now.getMonth() - 1));
-            } else if (period === 'year') {
-                startDate = new Date(now.setFullYear(now.getFullYear() - 1));
-            }
+<script>
+/* ========= Utilities ========= */
+const fmt = new Intl.NumberFormat('vi-VN', { style:'currency', currency:'VND', maximumFractionDigits:0 });
+const uid = () => Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4);
+const $ = (q, el=document) => el.querySelector(q);
+const $$ = (q, el=document) => Array.from(el.querySelectorAll(q));
+const todayStr = () => new Date().toISOString().slice(0,10);
+const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
 
-            const filteredSales = sales.filter(sale => new Date(sale.date) >= startDate);
+/* ========= Storage Layer ========= */
+const KEY = 'pf_v1';
+const Store = {
+  load(){
+    const raw = localStorage.getItem(KEY);
+    if(!raw){
+      const seed = {
+        transactions: [],
+        goals: []
+      };
+      localStorage.setItem(KEY, JSON.stringify(seed));
+      return seed;
+    }
+    try { return JSON.parse(raw) } catch { return {transactions:[], goals:[]} }
+  },
+  save(data){ localStorage.setItem(KEY, JSON.stringify(data)); },
+  get(){ return this.load() },
+  set(partial){
+    const data = this.load();
+    const merged = { ...data, ...partial };
+    this.save(merged);
+    return merged;
+  },
+  wipe(){ localStorage.removeItem(KEY) }
+};
 
-            const summary = {};
-            filteredSales.forEach(sale => {
-                if (!summary[sale.item]) summary[sale.item] = { quantity: 0, total: 0 };
-                summary[sale.item].quantity += sale.quantity;
-                summary[sale.item].total += sale.quantity * sale.price;
-            });
+/* ========= State ========= */
+let state = Store.get();
+let filterMonth = ''; // YYYY-MM ('' = all)
 
-            const tbody = document.querySelector('#summary-table tbody');
-            tbody.innerHTML = '';
-            let overallTotal = 0;
+/* ========= Tabs ========= */
+const tabs = $$('.tab-btn');
+tabs.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabs.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    $$('.tab').forEach(s=>s.classList.add('hidden'));
+    $('#'+btn.dataset.tab).classList.remove('hidden');
+  })
+});
+$('#gotoTrans')?.addEventListener('click', ()=>{
+  document.querySelector('[data-tab="transactions"]').click();
+});
 
-            Object.keys(summary).sort().forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${item}</td>
-                    <td>${summary[item].quantity}</td>
-                    <td>$${summary[item].total.toFixed(2)}</td>
-                `;
-                tbody.appendChild(row);
-                overallTotal += summary[item].total;
-            });
+/* ========= Month Filter ========= */
+function buildMonthOptions(){
+  const sel = $('#monthFilter');
+  sel.innerHTML = '';
+  const optAll = new Option('All time','');
+  sel.add(optAll);
+  const months = new Set(state.transactions.map(t=>t.date.slice(0,7)));
+  [...months].sort().forEach(m=>{
+    const d = new Date(m+'-01T00:00:00');
+    const name = d.toLocaleString(undefined,{month:'long', year:'numeric'});
+    sel.add(new Option(name, m));
+  });
+  sel.value = filterMonth;
+  $('#rangeLabel').textContent = filterMonth ? sel.selectedOptions[0]?.textContent : 'All time';
+}
+$('#monthFilter').addEventListener('change', e=>{
+  filterMonth = e.target.value;
+  renderAll();
+});
+$('#resetMonth').addEventListener('click', ()=>{
+  filterMonth = '';
+  $('#monthFilter').value = '';
+  renderAll();
+});
 
-            document.getElementById('overall-total').textContent = `$${overallTotal.toFixed(2)}`;
-        }
-    </script>
+/* ========= Transaction CRUD ========= */
+function upsertTx(tx){
+  const idx = state.transactions.findIndex(x=>x.id===tx.id);
+  if(idx>=0) state.transactions[idx] = tx; else state.transactions.push(tx);
+  state.transactions.sort((a,b)=>b.date.localeCompare(a.date));
+  Store.save(state);
+}
+function deleteTx(id){
+  state.transactions = state.transactions.filter(t=>t.id!==id);
+  Store.save(state);
+}
+function txFormToObj(){
+  const id = $('#txId').value || uid();
+  const type = $('#txType').value;
+  const category = $('#txCategory').value.trim();
+  const amount = Number($('#txAmount').value);
+  const date = $('#txDate').value;
+  const note = $('#txNote').value.trim();
+  if(!category || !date || !(amount>=0)) throw new Error('Please fill all required fields.');
+  return {id,type,category,amount,date,note};
+}
+function fillTxForm(tx){
+  $('#txId').value = tx.id;
+  $('#txType').value = tx.type;
+  $('#txCategory').value = tx.category;
+  $('#txAmount').value = tx.amount;
+  $('#txDate').value = tx.date;
+  $('#txNote').value = tx.note || '';
+}
+function resetTxForm(){
+  $('#txId').value = '';
+  $('#txType').value = 'expense';
+  $('#txCategory').value = '';
+  $('#txAmount').value = '';
+  $('#txDate').value = todayStr();
+  $('#txNote').value = '';
+}
+$('#resetTx').addEventListener('click', resetTxForm);
+$('#txForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  try{
+    const tx = txFormToObj();
+    upsertTx(tx);
+    resetTxForm();
+    renderAll();
+  }catch(err){ alert(err.message) }
+});
+/* Initialize default date */
+$('#txDate').value = todayStr();
+
+/* ========= Savings Goals ========= */
+function upsertGoal(g){
+  const idx = state.goals.findIndex(x=>x.id===g.id);
+  if(idx>=0) state.goals[idx]=g; else state.goals.push(g);
+  Store.save(state);
+}
+function deleteGoal(id){
+  state.goals = state.goals.filter(g=>g.id!==id);
+  Store.save(state);
+}
+function goalFormToObj(){
+  const id = $('#goalId').value || uid();
+  const name = $('#goalName').value.trim();
+  const target = Number($('#goalTarget').value);
+  const saved = Number($('#goalSaved').value);
+  const deadline = $('#goalDeadline').value || '';
+  if(!name || !(target>=0) || !(saved>=0)) throw new Error('Fill goal name/amounts');
+  return {id,name,target,saved,deadline};
+}
+function fillGoalForm(g){
+  $('#goalId').value=g.id; $('#goalName').value=g.name;
+  $('#goalTarget').value=g.target; $('#goalSaved').value=g.saved;
+  $('#goalDeadline').value=g.deadline || '';
+}
+function resetGoalForm(){
+  $('#goalId').value=''; $('#goalName').value=''; $('#goalTarget').value='';
+  $('#goalSaved').value=''; $('#goalDeadline').value='';
+}
+$('#resetGoal').addEventListener('click', resetGoalForm);
+$('#goalForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  try{ const g = goalFormToObj(); upsertGoal(g); resetGoalForm(); renderAll(); }
+  catch(err){ alert(err.message) }
+});
+
+/* ========= Filters & Search ========= */
+$('#searchTx').addEventListener('input', renderTxTable);
+$('#typeFilter').addEventListener('change', renderTxTable);
+
+/* ========= Settings (Export / Import / Wipe) ========= */
+$('#exportBtn').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'personal-finance-export-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+$('#importFile').addEventListener('change', async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  try{
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if(!('transactions' in data) || !('goals' in data)) throw new Error('Invalid file');
+    state = data; Store.save(state); renderAll();
+    alert('Data imported successfully.');
+  }catch(err){ alert('Import failed: '+err.message) }
+  e.target.value = '';
+});
+$('#wipeBtn').addEventListener('click', ()=>{
+  if(confirm('This will delete ALL your data in this browser. Proceed?')){
+    Store.wipe(); state = Store.get(); renderAll();
+  }
+});
+
+/* ========= Derived Data & Render ========= */
+function filteredTx(){
+  const q = $('#searchTx').value.trim().toLowerCase();
+  const type = $('#typeFilter').value;
+  return state.transactions.filter(t=>{
+    const monthOk = filterMonth ? t.date.startsWith(filterMonth) : true;
+    const typeOk = type ? t.type===type : true;
+    const qOk = q ? (t.note||'').toLowerCase().includes(q) || t.category.toLowerCase().includes(q) : true;
+    return monthOk && typeOk && qOk;
+  });
+}
+function sums(list){
+  const income = list.filter(t=>t.type==='income').reduce((a,b)=>a+b.amount,0);
+  const expense = list.filter(t=>t.type==='expense').reduce((a,b)=>a+b.amount,0);
+  return {income, expense, net: income-expense};
+}
+function formatDate(d){ return new Date(d+'T00:00:00').toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}) }
+
+/* Render Dashboard */
+function renderSummary(){
+  const list = filteredTx();
+  const {income, expense, net} = sums(list);
+  $('#sumIncome').textContent = fmt.format(income);
+  $('#sumExpense').textContent = fmt.format(expense);
+  const v = $('#sumNet'); v.textContent = fmt.format(net);
+  v.classList.toggle('positive', net>=0); v.classList.toggle('negative', net<0);
+  const rate = income>0 ? Math.round((expense/income)*100) : 0;
+  $('#spendRate').textContent = `Spend rate: ${rate}%`;
+}
+function renderRecent(){
+  const tbody = $('#recentTable tbody'); tbody.innerHTML='';
+  const list = filteredTx().slice(0,8);
+  if(list.length===0){
+    const tr=document.createElement('tr');
+    const td=document.createElement('td'); td.colSpan=5; td.className='hint';
+    td.textContent='No transactions yet.'; tr.appendChild(td); tbody.appendChild(tr); return;
+  }
+  list.forEach(t=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML = `
+      <td>${formatDate(t.date)}</td>
+      <td><span class="pill ${t.type==='income'?'type-inc':'type-exp'}">${t.type}</span></td>
+      <td>${escapeHtml(t.category)}</td>
+      <td class="right">${fmt.format(t.amount)}</td>
+      <td>${escapeHtml(t.note||'')}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+function renderPie(){
+  const ctx = $('#pieIE').getContext('2d');
+  const {income, expense} = sums(filteredTx());
+  const total = income+expense;
+  ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height);
+  // draw ring background
+  const cx=ctx.canvas.width/2, cy=120, r=90, thick=40;
+  drawDonut(ctx, cx, cy, r, thick, '#0b1016');
+  if(total===0){
+    drawText(ctx, cx, cy, 'No data', 14, '#7f8ea8');
+    return;
+  }
+  const aExp = (expense/total)*Math.PI*2;
+  const aInc = (income/total)*Math.PI*2;
+  drawArcSegment(ctx,cx,cy,r,thick,-Math.PI/2,-Math.PI/2+aExp,'#f87171');
+  drawArcSegment(ctx,cx,cy,r,thick,-Math.PI/2+aExp,-Math.PI/2+aExp+aInc,'#22d3ee');
+  // legend
+  legend(ctx, 20, 230, [
+    ['Expenses', fmt.format(expense), '#f87171'],
+    ['Income', fmt.format(income), '#22d3ee']
+  ]);
+}
+function renderWeekly(){
+  const ctx = $('#barWeekly').getContext('2d');
+  ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height);
+  const data = weeklyTotals();
+  const w = ctx.canvas.width, h = ctx.canvas.height;
+  const pad = 30, x0=pad, y0=h-pad, x1=w-pad, y1=pad;
+  // axes
+  ctx.strokeStyle='#223045'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y0); ctx.lineTo(x1,y1); ctx.stroke();
+  const max = Math.max(1, ...data.map(d=>d.income,0), ...data.map(d=>d.expense,0));
+  const barW = (x1-x0-40)/data.length;
+  data.forEach((d,i)=>{
+    const x = x0 + 20 + i*barW;
+    const incH = (d.income/max) * (y0-y1);
+    const expH = (d.expense/max) * (y0-y1);
+    // expense
+    ctx.fillStyle = '#f87171'; ctx.fillRect(x, y0-expH, barW*0.4, expH);
+    // income
+    ctx.fillStyle = '#22d3ee'; ctx.fillRect(x+barW*0.45, y0-incH, barW*0.4, incH);
+    // labels
+    ctx.fillStyle='#7f8ea8'; ctx.font='12px system-ui';
+    ctx.textAlign='center'; ctx.fillText(d.label, x+barW*0.45, y0+14);
+  });
+  // title
+  ctx.fillStyle='#9fb1c9'; ctx.font='12px system-ui';
+  ctx.fillText('Weekly Income/Expense', x0, y1-10);
+}
+function weeklyTotals(){
+  const list = filteredTx();
+  let weeks = [];
+  if(filterMonth){
+    // break selected month into ISO weeks (Mon-Sun)
+    const [y,m] = filterMonth.split('-').map(Number);
+    const first = new Date(Date.UTC(y,m-1,1));
+    const last = new Date(Date.UTC(y,m,0));
+    // iterate weeks
+    let start = startOfWeek(first);
+    while(start <= last){
+      const end = endOfWeek(start);
+      const label = `${fmtDay(start)}-${fmtDay(end)}`;
+      const range = list.filter(t=>{
+        const d=new Date(t.date+'T00:00:00');
+        return d>=start && d<=end;
+      });
+      const {income,expense} = sums(range);
+      weeks.push({label,income,expense});
+      start = addDays(start,7);
+    }
+  }else{
+    // last 4 full weeks ending last Sunday
+    let end = endOfWeek(new Date());
+    end = addDays(end, -7); // last full week end
+    let start = addDays(end, -6);
+    for(let i=0;i<4;i++){
+      const label = `${fmtDay(start)}-${fmtDay(end)}`;
+      const range = state.transactions.filter(t=>{
+        const d=new Date(t.date+'T00:00:00');
+        return d>=start && d<=end;
+      });
+      const {income,expense} = sums(range);
+      weeks.unshift({label,income,expense}); // build from oldest
+      end = addDays(start,-1); start = addDays(end,-6);
+    }
+  }
+  return weeks;
+}
+function startOfWeek(d){ const x=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())); const day=(x.getUTCDay()+6)%7; return addDays(x,-day) }
+function endOfWeek(d){ return addDays(startOfWeek(d),6) }
+function addDays(d,days){ const x=new Date(d); x.setUTCDate(x.getUTCDate()+days); return x }
+function fmtDay(d){ const mm = String(d.getUTCMonth()+1).padStart(2,'0'); const dd=String(d.getUTCDate()).padStart(2,'0'); return `${dd}/${mm}` }
+
+/* Render Transactions table */
+function renderTxTable(){
+  const tbody = $('#txTable tbody'); tbody.innerHTML='';
+  const list = filteredTx();
+  if(list.length===0){
+    const tr=document.createElement('tr'); const td=document.createElement('td');
+    td.colSpan=6; td.className='hint'; td.textContent='No transactions found.'; tr.appendChild(td); tbody.appendChild(tr); return;
+  }
+  list.forEach(t=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML = `
+      <td>${formatDate(t.date)}</td>
+      <td><span class="pill ${t.type==='income'?'type-inc':'type-exp'}">${t.type}</span></td>
+      <td>${escapeHtml(t.category)}</td>
+      <td class="right">${fmt.format(t.amount)}</td>
+      <td>${escapeHtml(t.note||'')}</td>
+      <td class="nowrap">
+         <button class="btn" data-edit="${t.id}" title="Edit">✎</button>
+         <button class="btn danger" data-del="${t.id}" title="Delete">🗑</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  // events
+  $$('button[data-edit]').forEach(b=>b.addEventListener('click', ()=>{
+    const id=b.getAttribute('data-edit');
+    const tx=state.transactions.find(x=>x.id===id); if(!tx) return;
+    fillTxForm(tx);
+    document.querySelector('[data-tab="transactions"]').click();
+    $('#txCategory').focus();
+  }));
+  $$('button[data-del]').forEach(b=>b.addEventListener('click', ()=>{
+    const id=b.getAttribute('data-del');
+    if(confirm('Delete this transaction?')){ deleteTx(id); renderAll(); }
+  }));
+}
+
+/* Render Goals list */
+function renderGoals(){
+  const host = $('#goalList'); host.innerHTML='';
+  if(state.goals.length===0){ host.innerHTML = `<p class="hint">No goals yet. Create one above.</p>`; return; }
+  state.goals.forEach(g=>{
+    const pct = g.target>0 ? clamp(Math.round((g.saved/g.target)*100),0,999) : 0;
+    const due = g.deadline ? new Date(g.deadline+'T00:00:00') : null;
+    const dueTxt = g.deadline ? new Intl.DateTimeFormat(undefined,{year:'numeric',month:'short',day:'numeric'}).format(due) : 'No deadline';
+    const div = document.createElement('div');
+    div.className='card mt12';
+    div.innerHTML = `
+      <div class="row">
+        <div class="grow">
+          <div class="row" style="gap:8px">
+            <strong>${escapeHtml(g.name)}</strong>
+            <span class="chip">Target: ${fmt.format(g.target)}</span>
+            <span class="chip">Saved: ${fmt.format(g.saved)}</span>
+            <span class="chip">Deadline: ${dueTxt}</span>
+          </div>
+          <div class="progress mt8"><span style="width:${Math.min(pct,100)}%"></span></div>
+          <div class="hint mt8">${pct}% complete</div>
+        </div>
+        <div class="row">
+          <button class="btn" data-gedit="${g.id}">✎ Edit</button>
+          <button class="btn danger" data-gdel="${g.id}">🗑 Delete</button>
+        </div>
+      </div>`;
+    host.appendChild(div);
+  });
+  $$('button[data-gedit]').forEach(b=>b.addEventListener('click', ()=>{
+    const id=b.getAttribute('data-gedit'); const g=state.goals.find(x=>x.id===id); if(!g) return;
+    fillGoalForm(g); document.querySelector('[data-tab="savings"]').click(); $('#goalName').focus();
+  }));
+  $$('button[data-gdel]').forEach(b=>b.addEventListener('click', ()=>{
+    const id=b.getAttribute('data-gdel');
+    if(confirm('Delete this goal?')){ deleteGoal(id); renderAll(); }
+  }));
+}
+
+/* ========= Canvas Helpers ========= */
+function drawDonut(ctx, cx, cy, r, thick, color){
+  ctx.beginPath(); ctx.arc(cx,cy,r,-Math.PI, Math.PI); ctx.lineWidth=thick; ctx.strokeStyle=color; ctx.stroke();
+}
+function drawArcSegment(ctx,cx,cy,r,thick,a0,a1,color){
+  ctx.beginPath(); ctx.arc(cx,cy,r,a0,a1); ctx.lineWidth=thick; ctx.lineCap='butt'; ctx.strokeStyle=color; ctx.stroke();
+}
+function drawText(ctx,x,y,text,size=14,color='#9fb1c9'){
+  ctx.fillStyle=color; ctx.font=`${size}px system-ui`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(text,x,y);
+}
+function legend(ctx, x, y, items){
+  items.forEach((it,i)=>{
+    ctx.fillStyle=it[2]; ctx.fillRect(x, y+i*22-10, 12, 12);
+    ctx.fillStyle='#c9d7ee'; ctx.font='12px system-ui'; ctx.textBaseline='alphabetic';
+    ctx.fillText(`${it[0]} — ${it[1]}`, x+18, y+i*22);
+  });
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m])) }
+
+/* ========= Seed (optional demo) ========= */
+if(state.transactions.length===0){
+  const d = todayStr();
+  state.transactions = [
+    {id:uid(), type:'income',  category:'Salary', amount:15000000, date:d, note:'Monthly'},
+    {id:uid(), type:'expense', category:'Food',   amount:350000,   date:d, note:'Lunch'},
+    {id:uid(), type:'expense', category:'Transport', amount:120000, date:d, note:'Grab'},
+    {id:uid(), type:'income',  category:'Freelance', amount:2000000, date:shiftDate(d,-2), note:'UI fix'},
+    {id:uid(), type:'expense', category:'Rent', amount:5000000, date:shiftDate(d,-10), note:''}
+  ];
+  state.goals = [
+    {id:uid(), name:'Emergency Fund', target:30000000, saved:8000000, deadline:''},
+    {id:uid(), name:'Trip to Da Nang', target:12000000, saved:3000000, deadline:''}
+  ];
+  Store.save(state);
+}
+function shiftDate(iso, delta){ const d=new Date(iso+'T00:00:00'); d.setDate(d.getDate()+delta); return d.toISOString().slice(0,10) }
+
+/* ========= Render Root ========= */
+function renderAll(){
+  buildMonthOptions();
+  renderSummary();
+  renderRecent();
+  renderPie();
+  renderWeekly();
+  renderTxTable();
+  renderGoals();
+}
+renderAll();
+
+/* Accessibility: keyboard nav between tabs */
+document.addEventListener('keydown', (e)=>{
+  if(e.altKey || e.ctrlKey || e.metaKey) return;
+  if(e.key==='ArrowRight' || e.key==='ArrowLeft'){
+    const idx = tabs.findIndex(b=>b.classList.contains('active'));
+    const next = e.key==='ArrowRight' ? (idx+1)%tabs.length : (idx-1+tabs.length)%tabs.length;
+    tabs[next].focus(); tabs[next].click();
+  }
+});
+</script>
 </body>
 </html>
