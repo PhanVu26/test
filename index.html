@@ -1,548 +1,146 @@
 <!doctype html>
 <html lang="vi">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Quản lý danh mục — Mobile (iPhone Pro ready)</title>
-
-<!-- Basic meta for iOS PWA behavior (optional) -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock Manager</title>
 <style>
-  /* ---------- Reset & base ---------- */
-  :root{
-    --bg: #071124;
-    --card: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    --muted: #9aa9bf;
-    --accent: #06b6d4; /* teal */
-    --accent-contrast: #001f23;
-    --danger: #ff6b6b;
-    --radius: 12px;
-    --maxWidth: 920px;
-    /* fluid spacing scale */
-    --space-xs: 6px;
-    --space-sm: 10px;
-    --space-md: 14px;
-    --space-lg: 20px;
-  }
-
-  /* Safe area basics: use env() with fallback (older iOS) */
-  html,body {height:100%}
-  body{
-    margin:0;
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    background: linear-gradient(180deg,#071124 0%, #081627 100%);
-    color: #e6eef8;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    /* apply safe area padding so content never touches notch/home indicator */
-    padding-top: env(safe-area-inset-top, 12px);
-    padding-bottom: env(safe-area-inset-bottom, 12px);
-    padding-left: env(safe-area-inset-left, 6px);
-    padding-right: env(safe-area-inset-right, 6px);
-    display:flex;
-    justify-content:center;
-  }
-
-  /* center container and limit width for large phones/tablets */
-  .app {
-    width:100%;
-    max-width:var(--maxWidth);
-    padding:clamp(12px, 3vw, 20px);
-    box-sizing:border-box;
-  }
-
-  /* fluid typography: min 14px, ideal 2.2vw, max 18px for base */
-  html { font-size: clamp(14px, 2.2vw, 18px); }
-
-  header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:var(--space-sm);
-    margin-bottom:var(--space-md);
-  }
-  h1{font-size:1.05rem;margin:0}
-  .muted{color:var(--muted);font-size:0.85rem}
-
-  /* Card */
-  .card{
-    background:var(--card);
-    border-radius:var(--radius);
-    padding:var(--space-md);
-    box-shadow: 0 6px 18px rgba(2,6,23,0.55);
-    margin-bottom:var(--space-md);
-    overflow:hidden;
-  }
-
-  /* layout: mobile-first single column; larger screens use 2 cols */
-  .grid {
-    display:grid;
-    grid-template-columns: 1fr;
-    gap:var(--space-md);
-  }
-  @media(min-width:880px){
-    .grid { grid-template-columns: 1fr 420px; align-items:start; }
-  }
-
-  /* form controls */
-  label{display:block;color:var(--muted);font-size:0.9rem;margin-bottom:6px}
-  input[type="number"], input[type="text"], select, textarea {
-    width:100%;
-    padding:10px;
-    border-radius:10px;
-    border:1px solid rgba(255,255,255,0.06);
-    background:transparent;
-    color:inherit;
-    font-size:1rem;
-    outline:none;
-  }
-  input:focus { box-shadow: 0 0 0 3px rgba(6,182,212,0.08); border-color: rgba(6,182,212,0.18) }
-
-  /* Buttons: large touch targets */
-  .btn {
-    background:var(--accent);
-    color:var(--accent-contrast);
-    padding:12px 14px;
-    border-radius:10px;
-    border:none;
-    font-weight:700;
-    font-size:1rem;
-    min-height:48px;              /* ensure touch target >= 44pt */
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-    cursor:pointer;
-  }
-  .btn-ghost {
-    background:transparent;
-    border:1px solid rgba(255,255,255,0.06);
-    color:var(--muted);
-    padding:10px 12px;
-    border-radius:10px;
-    min-height:44px;
-    cursor:pointer;
-  }
-  .controls { display:flex; gap:10px; flex-wrap:wrap; }
-
-  /* table -> responsive list on mobile */
-  table { width:100%; border-collapse:collapse; font-size:0.95rem; }
-  thead { display:none } /* hide table headers on very small screens for clean cards */
-  tbody tr { display:block; margin-bottom:10px; padding:10px; background: rgba(255,255,255,0.01); border-radius:8px }
-  tbody td { display:flex; justify-content:space-between; padding:6px 0; color:var(--muted) }
-
-  @media(min-width:640px){
-    thead { display:table-header-group }
-    tbody tr { display:table-row; background:transparent; border-radius:0; margin:0 }
-    tbody td { padding:10px 8px; color:inherit }
-  }
-
-  /* helper: small tag */
-  .tag { background: rgba(255,255,255,0.03); padding:6px 10px; border-radius:999px; font-weight:700; font-size:0.9rem }
-
-  /* responsive footer area safe spacing */
-  footer { text-align:center; color:var(--muted); font-size:0.9rem; margin-top:8px; padding-bottom: env(safe-area-inset-bottom, 12px) }
-
-  /* smooth scrolling on iOS */
-  .scrollable { -webkit-overflow-scrolling: touch; overflow:auto }
-
-  /* subtle input grouping for mobile */
-  .row { display:flex; gap:10px; }
-  .col { flex:1; min-width:0; } /* prevent overflow */
-  .w-120 { width:120px; }
-  .w-90 { width:90px; }
-  .w-70 { width:70px; }
-
-  /* small text helpers */
-  .small { font-size:0.88rem; color:var(--muted) }
-
-  /* responsive utilities */
-  .right { text-align:right }
-  .mb-sm { margin-bottom:8px }
+  body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#0e1117;color:#f1f5f9}
+  header{padding:12px;text-align:center;background:#1e293b;font-size:18px;font-weight:600}
+  nav{display:flex;justify-content:space-around;background:#1e293b}
+  nav button{flex:1;padding:12px;background:none;border:none;color:#94a3b8;font-weight:600;font-size:15px}
+  nav button.active{color:#2dd4bf;border-bottom:3px solid #2dd4bf}
+  .page{display:none;padding:16px}
+  .page.active{display:block}
+  .card{background:#1e293b;border-radius:10px;padding:16px;margin-bottom:12px;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+  label{font-size:14px;color:#94a3b8;display:block;margin-bottom:4px}
+  input,select{width:100%;padding:10px;margin-bottom:12px;border-radius:8px;border:none;font-size:16px}
+  button.action{width:100%;padding:12px;border:none;border-radius:8px;background:#2dd4bf;color:#03202b;font-weight:600;font-size:16px;margin-top:8px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{padding:8px;text-align:left;border-bottom:1px solid #334155}
+  h3{margin-top:0;font-size:16px}
 </style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div>
-        <h1>Portfolio Manager — Mobile</h1>
-        <div class="muted small">Hoạt động mượt trên iPhone Pro / Notch / Dynamic Island</div>
-      </div>
-      <div class="tag">Rule: <span id="riskLabel">1%</span></div>
-    </header>
+<header>Stock Manager</header>
+<nav>
+  <button class="tab active" data-page="trade">Vào lệnh</button>
+  <button class="tab" data-page="journal">Nhật ký</button>
+  <button class="tab" data-page="settings">Cài đặt</button>
+</nav>
 
-    <main class="grid">
-      <!-- LEFT: main controls -->
-      <section>
-        <!-- SETTINGS -->
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <strong>Thiết lập vốn & rủi ro</strong>
-            <div class="small muted">Even lot = 100 cp</div>
-          </div>
-          <div style="margin-top:12px" class="row">
-            <div class="col">
-              <label>Vốn (VND)</label>
-              <input id="capital" type="number" inputmode="numeric" value="25000000" />
-            </div>
-            <div class="w-120">
-              <label>% rủi ro / lệnh</label>
-              <input id="riskPercent" type="number" step="0.1" min="0.1" max="5" value="1" />
-            </div>
-            <div class="w-70">
-              <label>Even lot</label>
-              <input id="evenLot" type="number" value="100" />
-            </div>
-          </div>
-
-          <div style="margin-top:12px" class="controls">
-            <button id="saveSettings" class="btn">Lưu</button>
-            <button id="resetAll" class="btn-ghost">Reset</button>
-            <button id="exportAll" class="btn-ghost">Export</button>
-          </div>
-        </div>
-
-        <!-- POSITION SIZING -->
-        <div class="card">
-          <strong>Position Sizing Calculator</strong>
-          <div class="small muted mb-sm">Nhập entry & stop — app gợi ý số cp theo rule rủi ro</div>
-          <div class="row mb-sm">
-            <div class="col">
-              <label>Mã</label>
-              <input id="psSymbol" type="text" value="VCB" />
-            </div>
-            <div class="w-120">
-              <label>Entry (₫)</label>
-              <input id="psEntry" inputmode="numeric" type="number" value="61700" />
-            </div>
-            <div class="w-120">
-              <label>Stop (₫)</label>
-              <input id="psStop" inputmode="numeric" type="number" value="56800" />
-            </div>
-          </div>
-
-          <div class="row mb-sm">
-            <div class="col">
-              <label>Stop % (tự tính nếu bỏ trống)</label>
-              <input id="psStopPct" type="number" step="0.1" />
-            </div>
-            <div class="w-90">
-              <label>Odd-lot?</label>
-              <select id="psOdd"><option value="no">Không</option><option value="yes">Có</option></select>
-            </div>
-          </div>
-
-          <div class="controls">
-            <button id="calcBtn" class="btn">Tính kích thước</button>
-            <button id="addWatchBtn" class="btn-ghost">Thêm watchlist</button>
-          </div>
-
-          <div id="psResult" class="small muted" style="margin-top:12px"></div>
-        </div>
-
-        <!-- WATCHLIST (compact) -->
-        <div class="card scrollable" style="max-height:40vh;">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <strong>Watchlist</strong>
-            <div class="small muted">Tap để edit / kéo để scroll</div>
-          </div>
-
-          <table id="watchTable" style="margin-top:8px">
-            <thead>
-              <tr><th>Mã</th><th>Giá</th><th>Stop%</th><th>Alloc%</th><th></th></tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-
-          <div style="margin-top:12px" class="row">
-            <input id="newSymbol" class="col" placeholder="Mã, ví dụ: E1VFVN30" />
-            <div style="width:100px"><input id="newPrice" type="number" placeholder="Giá" /></div>
-          </div>
-          <div style="margin-top:8px" class="row">
-            <div style="width:90px"><input id="newStopPct" type="number" placeholder="%stop" /></div>
-            <div style="width:90px"><input id="newAlloc" type="number" placeholder="%alloc" /></div>
-            <div style="width:110px"><button id="addNew" class="btn">Thêm</button></div>
-          </div>
-        </div>
-
-        <!-- TRADE JOURNAL -->
-        <div class="card">
-          <div style="display:flex;justify-content:space-between">
-            <strong>Trade Journal</strong>
-            <div class="small muted">Ghi entry/exit</div>
-          </div>
-
-          <div style="margin-top:8px" class="row">
-            <input id="tjSymbol" placeholder="Mã" class="col" />
-            <div style="width:100px"><input id="tjQty" type="number" placeholder="Qty" /></div>
-            <div style="width:120px"><input id="tjPrice" type="number" placeholder="Giá" /></div>
-          </div>
-
-          <div class="row" style="margin-top:8px">
-            <select id="tjType" style="width:100px"><option value="buy">Buy</option><option value="sell">Sell</option></select>
-            <input id="tjStop" placeholder="Stop" class="col" />
-            <input id="tjTarget" placeholder="Target" class="col" />
-          </div>
-
-          <div class="row" style="margin-top:8px">
-            <input id="tjNote" placeholder="Ghi chú" class="col" />
-            <button id="tjAdd" class="btn">Ghi</button>
-          </div>
-
-          <div style="margin-top:10px">
-            <table id="tjTable"><thead><tr><th>Ngày</th><th>Mã</th><th>Qty</th><th>Giá</th><th>Loại</th><th></th></tr></thead><tbody></tbody></table>
-          </div>
-        </div>
-      </section>
-
-      <!-- RIGHT: portfolio summary -->
-      <aside>
-        <div class="card">
-          <strong>Allocation</strong>
-          <div class="small muted">Core / Mid / Spec / Cash</div>
-          <div style="margin-top:10px" class="row">
-            <input id="allocCore" class="w-70" type="number" value="40" />
-            <input id="allocMid"  class="w-70" type="number" value="30" />
-          </div>
-          <div class="row" style="margin-top:8px">
-            <input id="allocSpec" class="w-70" type="number" value="20" />
-            <input id="allocCash" class="w-70" type="number" value="10" />
-          </div>
-          <div style="margin-top:12px" class="controls">
-            <button id="applyAlloc" class="btn">Áp dụng</button>
-          </div>
-          <div id="allocSummary" class="small muted" style="margin-top:10px"></div>
-        </div>
-
-        <div class="card">
-          <strong>Quick metrics</strong>
-          <div class="small muted" style="margin-top:8px">
-            <div>Rủi ro / lệnh = <span id="showRiskMoney">250,000</span> ₫</div>
-            <div>Even-lot = <span id="showEven">100</span> cp</div>
-            <div style="margin-top:8px">Gợi ý: dùng <strong>Limit orders</strong> & kiểm broker phí.</div>
-          </div>
-        </div>
-
-        <div class="card small muted">
-          <div style="font-weight:700;margin-bottom:6px">Tips tối ưu iPhone</div>
-          • Đặt nút & input to (≥44px).<br>
-          • Kiểm tra landscape (xoay ngang) — app dùng fluid typography và max-width để giữ layout.<br>
-          • Nếu dùng PWA, thêm web app meta để hiển thị full-screen (đã thêm meta).
-        </div>
-      </aside>
-    </main>
-
-    <footer class="small muted">Lưu local trên trình duyệt • Không gửi data ra server</footer>
+<!-- PAGE TRADE -->
+<div id="trade" class="page active">
+  <div class="card">
+    <label>Mã CP</label>
+    <input id="symbol" placeholder="VD: VCB">
+    <label>Giá Entry</label>
+    <input id="entry" type="number">
+    <label>Loại Stop Loss</label>
+    <select id="stopType">
+      <option value="5">5%</option>
+      <option value="8" selected>8%</option>
+      <option value="10">10%</option>
+      <option value="custom">Tùy chỉnh</option>
+    </select>
+    <input id="customStop" type="number" placeholder="Giá stop (nếu tùy chỉnh)" style="display:none">
+    <button class="action" onclick="calc()">Tính toán</button>
+    <div id="result" style="margin-top:12px;font-size:15px"></div>
   </div>
+</div>
+
+<!-- PAGE JOURNAL -->
+<div id="journal" class="page">
+  <div class="card">
+    <h3>Nhật ký giao dịch</h3>
+    <table id="journalTable">
+      <thead><tr><th>Ngày</th><th>Mã</th><th>Entry</th><th>Stop</th><th>Qty</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <button class="action" onclick="exportCSV()">Xuất CSV</button>
+  </div>
+</div>
+
+<!-- PAGE SETTINGS -->
+<div id="settings" class="page">
+  <div class="card">
+    <label>Vốn (VND)</label>
+    <input id="capital" type="number" value="25000000">
+    <label>% Rủi ro / lệnh</label>
+    <input id="risk" type="number" value="1">
+    <label>Even lot</label>
+    <input id="lot" type="number" value="100">
+    <button class="action" onclick="saveSettings()">Lưu</button>
+  </div>
+</div>
 
 <script>
-/* ---------- JS: same features as previous version but with safer DOM handling ---------- */
-/* Persistence + utilities */
-const $ = id => document.getElementById(id);
-const fmtVnd = n => Number(n).toLocaleString('vi-VN');
+let settings = {capital:25000000,risk:1,lot:100};
+let journal = [];
 
-const LSKEY = 'ps_app_v2_safearea';
-let state = {
-  capital: 25000000, riskPercent:1, evenLot:100,
-  watchlist: [
-    {symbol:'E1VFVN30', price:32880, stopPct:8, alloc:40},
-    {symbol:'VCB', price:61700, stopPct:8, alloc:10},
-    {symbol:'FPT', price:93400, stopPct:12, alloc:10},
-    {symbol:'MWG', price:77100, stopPct:12, alloc:10},
-    {symbol:'HPG', price:27650, stopPct:15, alloc:10}
-  ],
-  journal: []
-};
-
-function loadState(){
-  try {
-    const raw = localStorage.getItem(LSKEY);
-    if(raw) state = Object.assign(state, JSON.parse(raw));
-  } catch(e){ console.warn('load',e) }
-}
-function saveState(){ localStorage.setItem(LSKEY, JSON.stringify(state)); }
-
-/* init UI values */
-function bindSettings(){
-  $('capital').value = state.capital;
-  $('riskPercent').value = state.riskPercent;
-  $('evenLot').value = state.evenLot;
-  $('riskLabel').textContent = state.riskPercent + '%';
-  $('showRiskMoney').textContent = fmtVnd(calcRiskMoney());
-  $('showEven').textContent = state.evenLot;
-}
-function calcRiskMoney(){ return Math.round(state.capital * (Number(state.riskPercent)/100)); }
-
-/* Watchlist rendering (responsive rows) */
-function renderWatchlist(){
-  const tbody = document.querySelector('#watchTable tbody');
-  tbody.innerHTML = '';
-  state.watchlist.forEach((w, i) => {
-    const tr = document.createElement('tr');
-    // make mobile-friendly row: left = info, right = actions
-    tr.innerHTML = `
-      <td><strong>${w.symbol}</strong></td>
-      <td class="right">${fmtVnd(w.price)}</td>
-      <td class="right">${w.stopPct || ''}%</td>
-      <td class="right">${w.alloc || ''}%</td>
-      <td style="text-align:right">
-        <button data-idx="${i}" class="btn-ghost edit">Sửa</button>
-        <button data-idx="${i}" class="btn-ghost del">Xóa</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-  // attach events
-  Array.from(document.querySelectorAll('.edit')).forEach(btn=>{
-    btn.onclick = e=>{
-      const i = Number(e.currentTarget.dataset.idx);
-      const w = state.watchlist[i];
-      $('newSymbol').value = w.symbol;
-      $('newPrice').value = w.price;
-      $('newStopPct').value = w.stopPct;
-      $('newAlloc').value = w.alloc;
-      state.watchlist.splice(i,1);
-      saveState(); renderWatchlist();
-    };
-  });
-  Array.from(document.querySelectorAll('.del')).forEach(btn=>{
-    btn.onclick = e=>{
-      if(!confirm('Xóa mã khỏi watchlist?')) return;
-      state.watchlist.splice(Number(e.currentTarget.dataset.idx),1);
-      saveState(); renderWatchlist();
-    };
-  });
+function calc(){
+  const sym=document.getElementById('symbol').value.toUpperCase();
+  const entry=+document.getElementById('entry').value;
+  if(!sym||entry<=0){alert("Nhập mã CP và giá hợp lệ!");return;}
+  let stop;
+  const type=document.getElementById('stopType').value;
+  if(type==='custom'){stop=+document.getElementById('customStop').value;}
+  else{stop=entry*(1-type/100);}
+  const riskMoney=settings.capital*(settings.risk/100);
+  const riskPerShare=Math.abs(entry-stop);
+  const qty=Math.floor(riskMoney/riskPerShare/settings.lot)*settings.lot;
+  document.getElementById('result').innerHTML=`
+    Stop = ${stop.toFixed(0)}₫<br>
+    Risk/share = ${riskPerShare.toFixed(0)}₫<br>
+    Qty = ${qty} cp<br>
+    Tổng vốn ~ ${(qty*entry).toLocaleString()}₫
+  `;
+  if(qty>0){
+    journal.push({date:new Date().toLocaleString(),symbol:sym,entry,stop,qty});
+    renderJournal();
+  }
 }
 
 function renderJournal(){
-  const tbody = document.querySelector('#tjTable tbody');
-  tbody.innerHTML = '';
-  state.journal.slice().reverse().forEach(j=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${new Date(j.date).toLocaleString()}</td><td>${j.symbol}</td><td>${j.qty}</td><td>${fmtVnd(j.price)}</td><td>${j.type}</td><td>${(j.note||'')}</td>`;
+  const tbody=document.querySelector('#journalTable tbody');
+  tbody.innerHTML='';
+  journal.forEach(j=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${j.date}</td><td>${j.symbol}</td><td>${j.entry}</td><td>${j.stop}</td><td>${j.qty}</td>`;
     tbody.appendChild(tr);
   });
 }
 
-/* events */
-document.getElementById('saveSettings').onclick = ()=>{
-  state.capital = Number($('capital').value) || state.capital;
-  state.riskPercent = Number($('riskPercent').value) || state.riskPercent;
-  state.evenLot = Number($('evenLot').value) || state.evenLot;
-  $('riskLabel').textContent = state.riskPercent + '%';
-  $('showRiskMoney').textContent = fmtVnd(calcRiskMoney());
-  $('showEven').textContent = state.evenLot;
-  saveState();
-  alert('Đã lưu setting vào thiết bị');
-};
+function saveSettings(){
+  settings.capital=+document.getElementById('capital').value;
+  settings.risk=+document.getElementById('risk').value;
+  settings.lot=+document.getElementById('lot').value;
+  alert('Đã lưu cài đặt');
+}
 
-document.getElementById('resetAll').onclick = ()=>{
-  if(confirm('Reset toàn bộ dữ liệu local?')) {
-    localStorage.removeItem(LSKEY);
-    location.reload();
-  }
-};
+function exportCSV(){
+  let csv="Ngày,Mã,Entry,Stop,Qty\n";
+  journal.forEach(j=>{
+    csv+=`${j.date},${j.symbol},${j.entry},${j.stop},${j.qty}\n`;
+  });
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download="journal.csv";a.click();
+  URL.revokeObjectURL(url);
+}
 
-document.getElementById('exportAll').onclick = ()=>{
-  const out = {watchlist: state.watchlist, journal: state.journal};
-  const blob = new Blob([JSON.stringify(out, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'ps_backup_v2.json'; document.body.appendChild(a); a.click(); a.remove();
+document.getElementById('stopType').onchange=e=>{
+  document.getElementById('customStop').style.display=(e.target.value==='custom'?'block':'none');
 };
-
-document.getElementById('addNew').onclick = ()=>{
-  const sym = $('newSymbol').value.trim().toUpperCase();
-  const price = Number($('newPrice').value) || 0;
-  const stopPct = Number($('newStopPct').value) || 10;
-  const alloc = Number($('newAlloc').value) || 0;
-  if(!sym) return alert('Nhập mã');
-  state.watchlist.push({symbol: sym, price: price, stopPct: stopPct, alloc: alloc});
-  saveState(); renderWatchlist();
-  $('newSymbol').value=''; $('newPrice').value=''; $('newStopPct').value=''; $('newAlloc').value='';
-};
-
-document.getElementById('addWatchBtn').onclick = ()=>{
-  const sym = $('psSymbol').value.trim().toUpperCase();
-  const price = Number($('psEntry').value) || 0;
-  const stopPct = Number($('psStopPct').value) || Math.round((1 - (Number($('psStop').value) / price || 0))*100);
-  if(!sym) return alert('Nhập mã');
-  state.watchlist.push({symbol: sym, price: price, stopPct: stopPct, alloc: 0});
-  saveState(); renderWatchlist();
-  alert('Đã thêm ' + sym);
-};
-
-document.getElementById('calcBtn').onclick = ()=>{
-  state.capital = Number($('capital').value) || state.capital;
-  state.riskPercent = Number($('riskPercent').value) || state.riskPercent;
-  state.evenLot = Number($('evenLot').value) || state.evenLot;
-  const entry = Number($('psEntry').value);
-  let stop = Number($('psStop').value);
-  const stopPctInput = $('psStopPct').value;
-  const allowOdd = $('psOdd').value === 'yes';
-  if(!entry || (!stop && !stopPctInput)) return alert('Nhập entry và stop (hoặc stop%)');
-  let stopPct = stopPctInput ? Number(stopPctInput) : Math.round((1 - (stop/entry))*100);
-  if(!stop) stop = Math.round(entry * (1 - stopPct/100));
-  const riskMoney = calcRiskMoney();
-  const riskPerShare = Math.abs(entry - stop);
-  if(riskPerShare <= 0) return alert('Stop price phải khác entry');
-  const qtyRaw = Math.floor(riskMoney / riskPerShare);
-  const even = Number(state.evenLot) || 100;
-  let qtyEven = Math.floor(qtyRaw / even) * even;
-  let qtySuggested = qtyEven;
-  if(allowOdd && qtyRaw > 0) qtySuggested = qtyRaw;
-  const cost = qtySuggested * entry;
-  $('psResult').innerHTML = `
-    Rủi ro tiền = <strong>${fmtVnd(riskMoney)} ₫</strong><br>
-    Risk/share = <strong>${fmtVnd(riskPerShare)} ₫</strong><br>
-    Số cp (rule) = <strong>${qtyRaw}</strong> cp → gợi ý: <strong>${qtySuggested} cp</strong> (tổng ~ ${fmtVnd(cost)} ₫)<br>
-    Stop: <strong>${fmtVnd(stop)}</strong> (${stopPct}%)
-  `;
-};
-
-document.getElementById('applyAlloc').onclick = ()=>{
-  const core = Number($('allocCore').value)||0;
-  const mid = Number($('allocMid').value)||0;
-  const spec = Number($('allocSpec').value)||0;
-  const cash = Number($('allocCash').value)||0;
-  const total = core+mid+spec+cash;
-  if(total !== 100) return alert('Tổng % phân bổ phải = 100');
-  const cap = Number($('capital').value) || state.capital;
-  const summary = {
-    Core: Math.round(cap * core/100),
-    Mid: Math.round(cap * mid/100),
-    Spec: Math.round(cap * spec/100),
-    Cash: Math.round(cap * cash/100)
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.page).classList.add('active');
   };
-  $('allocSummary').innerHTML = `
-    Core: <strong>${fmtVnd(summary.Core)} ₫</strong><br>
-    Mid: <strong>${fmtVnd(summary.Mid)} ₫</strong><br>
-    Spec: <strong>${fmtVnd(summary.Spec)} ₫</strong><br>
-    Cash: <strong>${fmtVnd(summary.Cash)} ₫</strong>
-  `;
-  state.alloc = {core,mid,spec,cash};
-  saveState();
-};
-
-$('tjAdd').onclick = ()=>{
-  const s = $('tjSymbol').value.trim().toUpperCase();
-  const qty = Number($('tjQty').value) || 0;
-  const price = Number($('tjPrice').value) || 0;
-  const type = $('tjType').value;
-  const note = $('tjNote').value;
-  if(!s || !qty || !price) return alert('Nhập mã, qty, price');
-  state.journal.push({date:Date.now(), symbol:s, qty, price, type, note});
-  saveState(); renderJournal();
-  $('tjSymbol').value=''; $('tjQty').value=''; $('tjPrice').value=''; $('tjNote').value='';
-};
-
-/* initial */
-loadState();
-bindSettings();
-renderWatchlist();
-renderJournal();
-window.addEventListener('beforeunload', saveState);
+});
 </script>
 </body>
 </html>
